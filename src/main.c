@@ -67,9 +67,6 @@ static AXUIElementRef g_window;
 static uint32_t g_window_id;
 static char *color_argv;
 
-
-
-
 //
 // EVENT HANDLERS
 //
@@ -347,7 +344,6 @@ static uint32_t token_to_uint32t(struct token token)
     return result;
 }
 
-
 struct rgba_color
 {
     bool is_valid;
@@ -373,7 +369,6 @@ rgba_color_from_hex(uint32_t color)
 
 static inline void border_create(CFTypeRef frame_region)
 {
-
     uint32_t tags[2] = { (1 << 7) | (1 << 9) /*| (1 << 11)*/, 0 };
     SLSNewWindow(g_connection, 2, 0, 0, frame_region, &g_border_id);
     SLSSetWindowTags(g_connection, g_border_id, tags, 64);
@@ -403,7 +398,6 @@ static inline void border_create(CFTypeRef frame_region)
                                color_struct.g,
                                color_struct.b,
                                color_struct.a);
-    
 }
 
 static inline void border_hide(void)
@@ -524,4 +518,3 @@ int main(int argc, char **argv)
     CFRunLoopRun();
     return 0;
 }
-
