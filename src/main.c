@@ -65,6 +65,10 @@ static AXObserverRef g_observer;
 static AXUIElementRef g_application;
 static AXUIElementRef g_window;
 static uint32_t g_window_id;
+static char *color_argv;
+
+
+
 
 //
 // EVENT HANDLERS
@@ -327,8 +331,49 @@ static void unsubscribe_notifications(void)
 // BORDER WINDOW STUFF
 //
 
+struct token
+{
+    char *text;
+    unsigned int length;
+};
+
+static uint32_t token_to_uint32t(struct token token)
+{
+    uint32_t result = 0;
+    char buffer[token.length + 1];
+    memcpy(buffer, token.text, token.length);
+    buffer[token.length] = '\0';
+    sscanf(buffer, "%x", &result);
+    return result;
+}
+
+
+struct rgba_color
+{
+    bool is_valid;
+    uint32_t p;
+    float r;
+    float g;
+    float b;
+    float a;
+};
+
+static struct rgba_color 
+rgba_color_from_hex(uint32_t color)
+{
+    struct rgba_color result;
+    result.is_valid = true;
+    result.p = color;
+    result.r = ((color >> 16) & 0xff) / 255.0;
+    result.g = ((color >> 8) & 0xff) / 255.0;
+    result.b = ((color >> 0) & 0xff) / 255.0;
+    result.a = ((color >> 24) & 0xff) / 255.0;
+    return result;
+}
+
 static inline void border_create(CFTypeRef frame_region)
 {
+
     uint32_t tags[2] = { (1 << 7) | (1 << 9) /*| (1 << 11)*/, 0 };
     SLSNewWindow(g_connection, 2, 0, 0, frame_region, &g_border_id);
     SLSSetWindowTags(g_connection, g_border_id, tags, 64);
@@ -336,11 +381,29 @@ static inline void border_create(CFTypeRef frame_region)
     SLSSetWindowLevel(g_connection, g_border_id, CGWindowLevelForKey(17));
     g_border_context = SLWindowContextCreate(g_connection, g_border_id, 0);
     CGContextSetLineWidth(g_border_context, 4);
+
+    struct token input_color;
+    uint32_t hex_color;
+
+    input_color.text = color_argv;
+    input_color.length = sizeof(color_argv);
+
+    if (color_argv == 0)
+    {
+        input_color.text = "ffffffff";
+        input_color.length = 8;
+    }
+
+    hex_color = token_to_uint32t(input_color);
+
+    struct rgba_color color_struct = rgba_color_from_hex(hex_color);
+
     CGContextSetRGBStrokeColor(g_border_context,
-                               0.831f,
-                               0.824f,
-                               0.196f,
-                               1.000f);
+                               color_struct.r,
+                               color_struct.g,
+                               color_struct.b,
+                               color_struct.a);
+    
 }
 
 static inline void border_hide(void)
@@ -435,6 +498,8 @@ int main(int argc, char **argv)
 {
     bool success;
 
+    color_argv = argv[1];
+
     const void *keys[] = { kAXTrustedCheckOptionPrompt };
     const void *values[] = { kCFBooleanTrue };
     CFDictionaryRef options = CFDictionaryCreate(NULL, keys, values, 1, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
@@ -459,3 +524,4 @@ int main(int argc, char **argv)
     CFRunLoopRun();
     return 0;
 }
+
