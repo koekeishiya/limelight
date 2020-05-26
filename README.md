@@ -13,7 +13,7 @@ yabai -m signal --add event=application_activated action="pkill -SIGUSR1 limelig
 
 # kill any existing limelight process if one exists, before we launch a new one
 killall limelight &> /dev/null
-/path/to/bin/limelight &> /dev/null &
+limelight &> /dev/null &
 ```
 
 ### Build
@@ -23,4 +23,5 @@ Requires xcode command line tools
 ```sh
 # simply clone repo and run make
   make
+  make install
 ```
