@@ -40,15 +40,6 @@ static bool token_is_valid(struct token token)
     return token.text && token.length > 0;
 }
 
-static char *token_to_string(struct token token)
-{
-    char *result = malloc(token.length + 1);
-    if (!result) return NULL;
-
-    memcpy(result, token.text, token.length);
-    result[token.length] = '\0';
-    return result;
-}
 
 static uint32_t token_to_uint32t(struct token token)
 {
